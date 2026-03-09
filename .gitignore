@@ -1,0 +1,52 @@
+# Dependencies
+/vendor
+/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+.pnp.*
+
+# Environment & secrets
+.env
+.env.backup
+.env.production
+.env.local
+.env.*.local
+.env.testing
+/auth.json
+
+# Build & compiled
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+
+# PHP / testing
+.phpactor.json
+.phpunit.result.cache
+.phpunit.cache
+/.phpunit.cache
+.php-cs-fixer.cache
+/coverage
+*.log
+
+# IDE & editors
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local / Vagrant
+Homestead.json
+Homestead.yaml
+
+# Optional: uncomment to ignore Cursor project data
+# /.cursor
