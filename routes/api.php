@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DeviceActivityController;
 use App\Http\Controllers\Api\DeviceController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,4 +20,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/devices', [DeviceController::class, 'store']);
     Route::patch('/devices/{device}', [DeviceController::class, 'update']);
+
+    Route::post('/device-activities', [DeviceActivityController::class, 'store']);
 });
