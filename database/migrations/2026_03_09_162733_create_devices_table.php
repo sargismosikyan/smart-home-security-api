@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('devices', function (Blueprint $table) {
             $table->id();
+            $table->string('external_id')->nullable();
+            $table->string('name');
+            $table->string('type');
+            $table->string('location')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
+
+            $table->index('type');
+            $table->index('is_active');
         });
     }
 

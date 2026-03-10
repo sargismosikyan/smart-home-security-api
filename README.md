@@ -1,59 +1,150 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Smart Home Security API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel 12 backend service that registers smart home devices, stores device activity, detects suspicious activity, and returns security alerts through a secure API.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Requirements
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.2+
+- Composer
+- SQLite (default) or MySQL/MariaDB
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Setup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Running
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+php artisan serve
+```
 
-### Premium Partners
+API is available at `http://127.0.0.1:8000/api`.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## API Authentication
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+All API endpoints (except `/api/login`) are protected by **Laravel Sanctum** token-based authentication.
 
-## Code of Conduct
+### 1. Obtain a token
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**`POST /api/login`**
 
-## Security Vulnerabilities
+Request body (JSON):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```json
+{
+  "email": "user@example.com",
+  "password": "secret"
+}
+```
 
-## License
+Successful response (`200`):
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```json
+{
+  "token": "1|abc123...",
+  "token_type": "Bearer"
+}
+```
+
+Invalid credentials response (`401`):
+
+```json
+{
+  "message": "The provided credentials are incorrect."
+}
+```
+
+### 2. Use the token
+
+Include the token in the `Authorization` header on every subsequent request:
+
+```
+Authorization: Bearer 1|abc123...
+```
+
+Example:
+
+```bash
+curl -H "Authorization: Bearer 1|abc123..." \
+     http://127.0.0.1:8000/api/health
+```
+
+### 3. Revoke the token (logout)
+
+**`POST /api/logout`** _(requires valid token)_
+
+```bash
+curl -X POST \
+     -H "Authorization: Bearer 1|abc123..." \
+     http://127.0.0.1:8000/api/logout
+```
+
+Response (`200`):
+
+```json
+{
+  "message": "Logged out successfully."
+}
+```
+
+### 4. Unauthenticated requests
+
+Any request to a protected endpoint without a valid token returns:
+
+**`401 Unauthorized`**
+
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+---
+
+## Creating a test user
+
+Use Artisan Tinker to create a user for local testing:
+
+```bash
+php artisan tinker
+```
+
+```php
+\App\Models\User::create([
+    'name' => 'Admin',
+    'email' => 'admin@example.com',
+    'password' => bcrypt('password'),
+]);
+```
+
+---
+
+## Architecture
+
+- **Framework:** Laravel 12
+- **Database:** SQLite (configurable via `DB_CONNECTION` in `.env`)
+- **Authentication:** Laravel Sanctum (API token-based)
+- **Models:** `Device`, `DeviceActivity`, `SecurityAlert`, `User`
+
+---
+
+## Design Decisions
+
+- Sanctum API tokens chosen over Basic Auth for stateless, revocable, production-ready token flows.
+- SQLite used by default for portability; swapping to MySQL/MariaDB requires only updating `.env`.
+- All API routes live under `/api` prefix (registered via `bootstrap/app.php`).
+- Unauthenticated requests to API routes always return `401` JSON regardless of `Accept` header.

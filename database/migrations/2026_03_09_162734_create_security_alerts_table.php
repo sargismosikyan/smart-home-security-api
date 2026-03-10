@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('security_alerts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('device_id')->constrained('devices')->cascadeOnDelete();
+            $table->string('alert_type');
+            $table->string('severity');
+            $table->text('description');
+            $table->json('metadata')->nullable();
+            $table->timestamp('resolved_at')->nullable();
             $table->timestamps();
+
+            $table->index('device_id');
+            $table->index('severity');
+            $table->index('created_at');
         });
     }
 
