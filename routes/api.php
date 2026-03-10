@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DeviceController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -15,4 +16,7 @@ Route::middleware('auth:sanctum')->group(function () {
             'timestamp' => now()->toIso8601String(),
         ]);
     });
+
+    Route::post('/devices', [DeviceController::class, 'store']);
+    Route::patch('/devices/{device}', [DeviceController::class, 'update']);
 });

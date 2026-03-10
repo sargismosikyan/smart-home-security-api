@@ -6,7 +6,7 @@ use App\Enums\DeviceType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreDeviceRequest extends FormRequest
+class UpdateDeviceRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,9 +16,9 @@ class StoreDeviceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'      => ['required', 'string', 'max:255'],
-            'type'      => ['required', 'string', Rule::enum(DeviceType::class)],
-            'location'  => ['nullable', 'string', 'max:255'],
+            'name'      => ['sometimes', 'string', 'max:255'],
+            'type'      => ['sometimes', 'string', Rule::enum(DeviceType::class)],
+            'location'  => ['sometimes', 'nullable', 'string', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
