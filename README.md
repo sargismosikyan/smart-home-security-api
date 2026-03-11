@@ -7,6 +7,13 @@ A Laravel 12 backend service that registers smart home devices, stores device ac
 ## Requirements
 
 - PHP 8.2+
+- PHP SQLite extension (`php8.2-sqlite3`) when using SQLite:
+
+  ```bash
+  sudo apt update
+  sudo apt install php8.2-sqlite3
+  ```
+
 - Composer
 - SQLite (default) or MySQL/MariaDB
 
@@ -33,6 +40,51 @@ php artisan serve
 API base URL: `http://127.0.0.1:8000/api`
 
 Interactive API docs: `http://127.0.0.1:8000/docs/api`
+
+---
+
+## Seeding (demo data)
+
+To populate the database with demo data (default admin, two devices, two activities, two alerts):
+
+```bash
+php artisan db:seed
+```
+
+To run only the demo seeder:
+
+```bash
+php artisan db:seed --class=DemoSeeder
+```
+
+**Default demo user** (created by the seed):
+
+| Field    | Value                |
+|----------|----------------------|
+| Email    | `admin@example.com`  |
+| Password | `password`           |
+
+Use these credentials with `POST /api/login` to obtain a Bearer token. The seed also creates two devices (e.g. “Sensor in the kitchen”, “Front Door Camera v2”), two device activities, and two security alerts for testing the API.
+
+---
+
+## Adding a user via Tinker
+
+To create a user manually (e.g. an additional user or when not using the seed):
+
+```bash
+php artisan tinker
+```
+
+```php
+\App\Models\User::create([
+    'name'     => 'Admin',
+    'email'    => 'admin@example.com',
+    'password' => 'password',
+]);
+```
+
+The `User` model casts `password` to `hashed`, so you can pass a plain string; it will be hashed automatically.
 
 ---
 
@@ -120,22 +172,6 @@ curl -s -X POST http://127.0.0.1:8000/api/logout \
 
 ---
 
-## Creating a test user
-
-```bash
-php artisan tinker
-```
-
-```php
-\App\Models\User::create([
-    'name'     => 'Admin',
-    'email'    => 'admin@example.com',
-    'password' => bcrypt('password'),
-]);
-```
-
----
-
 ## API Documentation
 
 Interactive Swagger UI is served automatically by [Scramble](https://scramble.dedoc.co) (no annotations required):
@@ -192,8 +228,11 @@ Detection runs synchronously inside the same DB transaction as the activity. For
 | POST | `/api/login` | — | Obtain Bearer token |
 | POST | `/api/logout` | Bearer | Revoke current token |
 | GET | `/api/health` | Bearer | Health check |
+| GET | `/api/devices` | Bearer | List devices (filterable, paginated, 20/page default) |
 | POST | `/api/devices` | Bearer | Register a device |
 | PATCH | `/api/devices/{id}` | Bearer | Update a device |
+| DELETE | `/api/devices/{id}` | Bearer | Remove a device |
+| GET | `/api/device-activities` | Bearer | List activities (filterable, paginated, 20/page default) |
 | POST | `/api/device-activities` | Bearer | Store activity + run detection |
 | GET | `/api/security-alerts` | Bearer | List alerts (filterable, paginated) |
 | GET | `/api/security-alerts/{id}` | Bearer | Show single alert |

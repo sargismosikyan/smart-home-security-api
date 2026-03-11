@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateDeviceRequest;
 use App\Models\Device;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class DeviceController extends Controller
@@ -17,13 +18,16 @@ class DeviceController extends Controller
         $request->validate([
             'type'      => ['sometimes', 'string'],
             'is_active' => ['sometimes', 'boolean'],
+            'per_page'  => ['sometimes', 'integer', 'min:1', 'max:100'],
         ]);
+
+        $perPage = $request->integer('per_page', 20);
 
         return Device::query()
             ->when($request->filled('type'), fn ($q) => $q->where('type', $request->string('type')))
             ->when($request->has('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->orderByDesc('created_at')
-            ->paginate(100);
+            ->paginate($perPage);
     }
 
     public function show(Device $device): JsonResponse
@@ -43,5 +47,12 @@ class DeviceController extends Controller
         $device->update($request->validated());
 
         return response()->json($device);
+    }
+
+    public function destroy(Device $device): Response
+    {
+        $device->delete();
+
+        return response()->noContent();
     }
 }

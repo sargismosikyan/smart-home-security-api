@@ -23,7 +23,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/devices/{device}', [DeviceController::class, 'show']);
     Route::post('/devices', [DeviceController::class, 'store']);
     Route::patch('/devices/{device}', [DeviceController::class, 'update']);
+    Route::delete('/devices/{device}', [DeviceController::class, 'destroy']);
 
+    Route::get('/device-activities', [DeviceActivityController::class, 'index']);
     Route::post('/device-activities', [DeviceActivityController::class, 'store']);
 
     Route::get('/security-alerts', [SecurityAlertController::class, 'index']);
