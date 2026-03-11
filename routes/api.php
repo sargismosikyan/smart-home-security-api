@@ -19,6 +19,8 @@ Route::middleware('auth:sanctum')->group(function () {
         ]);
     });
 
+    Route::get('/devices', [DeviceController::class, 'index']);
+    Route::get('/devices/{device}', [DeviceController::class, 'show']);
     Route::post('/devices', [DeviceController::class, 'store']);
     Route::patch('/devices/{device}', [DeviceController::class, 'update']);
 
